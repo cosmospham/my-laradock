@@ -7,8 +7,7 @@ services:
     applications:
         image: tianon/true
         volumes:
-            - /Users/cosmos/dev/tugo/osticket/:/var/www/site-1
-            - /Users/cosmos/dev/tugo/osticket/subticket:/var/www/subticket
+            - /Users/cosmos/dev/tugo/osticket/:/var/www/public
 #            - ../sample/:/var/www/sample
 
 ### Workspace Utilities Container ###########################
@@ -17,7 +16,7 @@ services:
         build:
             context: ./workspace
             args:
-                - INSTALL_XDEBUG=false
+                - INSTALL_XDEBUG=true
                 - INSTALL_MONGO=false
                 - INSTALL_NODE=false
                 - INSTALL_YARN=false
@@ -39,6 +38,9 @@ services:
         ports:
            - "2222:22"
         tty: true
+        environment:
+            - CONTAINER_TIMEZONE=Asia/Ho_Chi_Minh
+            - SET_CONTAINER_TIMEZONE=true
 
 ### PHP-FPM Container #######################################
 
@@ -57,8 +59,12 @@ services:
             dockerfile: Dockerfile-56
         volumes_from:
             - applications
+        volumes:
+            - ./logs/php-fpm/:/tmp/xdebug_log
         expose:
             - "9000"
+        ports:
+            - "9002:9002"
         links:
             - workspace
         extra_hosts:
@@ -67,6 +73,8 @@ services:
         environment:
             # IMPORTANT: Set the Remote Interpreter entry matching name to `laravel`
             - PHP_IDE_CONFIG=serverName=laravel
+            - CONTAINER_TIMEZONE=Asia/Ho_Chi_Minh
+            - SET_CONTAINER_TIMEZONE=true
 
 ### Nginx Server Container ##################################
 
@@ -86,6 +94,9 @@ services:
         links:
             - php-fpm
             - mysql
+        environment:
+            - CONTAINER_TIMEZONE=Asia/Ho_Chi_Minh
+            - SET_CONTAINER_TIMEZONE=true
 
 ### Apache Server Container #################################
 
@@ -99,10 +110,14 @@ services:
         volumes:
             - ./logs/apache2:/var/log/apache2
         ports:
-            - "80:80"
+            - "1180:80"
             - "443:443"
         links:
             - php-fpm
+            - mysql
+        environment:
+            - CONTAINER_TIMEZONE=Asia/Ho_Chi_Minh
+            - SET_CONTAINER_TIMEZONE=true
 
 ### HHVM Container ##########################################
 
@@ -129,6 +144,9 @@ services:
             - ./mysql/data:/var/lib/mysql
         ports:
             - "13306:3306"
+        environment:
+            - CONTAINER_TIMEZONE=Asia/Ho_Chi_Minh
+            - SET_CONTAINER_TIMEZONE=true
 
 ### MariaDB Container #######################################
 

@@ -20,6 +20,20 @@ RUN sed -i 's/MYSQL_DATABASE/'$MYSQL_DATABASE'/g' /etc/mysql/startup && \
     sed -i 's/MYSQL_USER/'$MYSQL_USER'/g' /etc/mysql/startup && \
     sed -i 's/MYSQL_PASSWORD/'$MYSQL_PASSWORD'/g' /etc/mysql/startup
 
+#####################################
+# Set timezone:
+#####################################
+ENV SET_CONTAINER_TIMEZONE=true
+ENV CONTAINER_TIMEZONE=Asia/Ho_Chi_Minh
+
+RUN if [ ${SET_CONTAINER_TIMEZONE} = true ]; then \
+    cp /usr/share/zoneinfo/${CONTAINER_TIMEZONE} /etc/localtime && \
+    echo "${CONTAINER_TIMEZONE}" >  /etc/timezone && \
+    echo "Container timezone set to: $CONTAINER_TIMEZONE" \
+else \
+    echo "Container timezone not modified" \
+;fi
+
 ADD my.cnf /etc/mysql/conf.d/my.cnf
 
 CMD ["mysqld", "--init-file=/etc/mysql/startup"]
